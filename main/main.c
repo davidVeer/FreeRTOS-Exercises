@@ -3,12 +3,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
-#include "Assignment1Component.h"
+#include "Assignment1_2.h"
 
 
 static const char *TAG = "LED";
 
 void app_main(void)
 {
-    run_Blink();
+    runAssignment_1_2();
 }
