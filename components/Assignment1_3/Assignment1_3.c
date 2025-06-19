@@ -12,20 +12,14 @@ TaskHandle_t task2;
 static const char *TAG = "CoreTasks";
 
 void runAssignment_1_3(){
-    xTaskCreate(Task1Code, "Task1", 10000,NULL,1,&task1);
-    xTaskCreate(Task2Code, "Task2", 10000,NULL,10,&task2);
+    xTaskCreatePinnedToCore(TaskCode, "Task1", 10000,NULL,1,&task1,0);
+    xTaskCreatePinnedToCore(TaskCode, "Task2", 10000,NULL,10,&task2,1);
 }
 
-void Task1Code(void * parameter){
+void TaskCode(void * parameter){
     for(;;){
-    ESP_LOGI(TAG, "Task 1");
+    ESP_LOGI(TAG, "Task is running on core %u",(uint) xPortGetCoreID());
     }
 }
 
-void Task2Code(void * parameter){
-    for(;;){
-    ESP_LOGI(TAG, "Task 2");
-    vTaskDelay(1);
-    }
-}
 
