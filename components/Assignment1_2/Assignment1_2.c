@@ -13,7 +13,7 @@ static const char *TAG = "LED";
 
 void runAssignment_1_2(){
     xTaskCreate(Task1Code, "Task1", 10000,NULL,1,&task1);
-    xTaskCreate(Task2Code, "Task2", 10000,NULL,1,&task2);
+    xTaskCreate(Task2Code, "Task2", 10000,NULL,10,&task2);
 }
 
 void Task1Code(void * parameter){
