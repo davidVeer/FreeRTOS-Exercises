@@ -25,6 +25,7 @@ void Task1Code(void * parameter){
 void Task2Code(void * parameter){
     for(;;){
     ESP_LOGI(TAG, "Task 2");
+    vTaskDelay(1);
     }
 }
 
