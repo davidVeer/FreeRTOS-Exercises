@@ -9,7 +9,7 @@
 TaskHandle_t task1;
 TaskHandle_t task2;
 
-static const char *TAG = "LED";
+static const char *TAG = "CoreTasks";
 
 void runAssignment_1_3(){
     xTaskCreate(Task1Code, "Task1", 10000,NULL,1,&task1);
