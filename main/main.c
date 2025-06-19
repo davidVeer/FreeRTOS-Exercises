@@ -3,12 +3,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
-#include "Assignment1_2.h"
+#include "Assignment1_3.h"
 
 
 static const char *TAG = "LED";
 
 void app_main(void)
 {
-    runAssignment_1_2();
+    runAssignment_1_3();
 }
