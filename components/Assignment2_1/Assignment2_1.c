@@ -11,10 +11,25 @@ void run_Assignment2_1(){
 }
 
 void Core_0_TaskLifecycle(){
+    int timesDelayed = 0;
+    ESP_LOGI(TAG, "Task is opgezet");
     for(;;){
-    static int timesDelayed = 0;
     int priority = uxTaskPriorityGet(NULL);
     ESP_LOGI(TAG, "Task currently has a Priority of: %d",priority);
+    
+    if (priority < 2){
+        vTaskDelete(NULL);
+    }
+
+
     vTaskDelay(4000/portTICK_PERIOD_MS);
+    ESP_LOGI(TAG, "weer 4 seconde");
+    timesDelayed++;
+    if (timesDelayed > 1){
+        timesDelayed = 0;
+        vTaskPrioritySet(NULL,priority-1);
+    }
+
+
     }
 }
