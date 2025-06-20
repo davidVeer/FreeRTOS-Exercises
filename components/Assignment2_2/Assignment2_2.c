@@ -14,25 +14,14 @@ void run_Assignment2_2(){
     configureLed(redLedTaskParameters[0]);
     configureLed(greenLedTaskParameters[0]);
     
-    xTaskCreatePinnedToCore(
-        BlinkLedWithInterval,           //Task function
-        "redLedTask",                   // task Name
-        10000,                          //stackDepth
-        (void *)redLedTaskParameters,   //parameters
-        10,                             // priority
-        NULL,                           // Taskhandle
-        0                               // Core ID
-    );
+    //Tasks pinned to core 0
+    xTaskCreatePinnedToCore(BlinkLedWithInterval,"redLedTask",10000,(void *)redLedTaskParameters,10,NULL,0);
+    xTaskCreatePinnedToCore(PrintStringTask,"printingToCore0",10000,NULL,1,NULL,0);
 
-    xTaskCreatePinnedToCore(
-        BlinkLedWithInterval,           //Task function
-        "greenLedTask",                 // task Name
-        10000,                          //stackDepth
-        (void *)greenLedTaskParameters, //parameters
-        10,                             // priority
-        NULL,                           // Taskhandle
-        1                               // Core ID
-    );
+    //Task pinned to core 1
+    xTaskCreatePinnedToCore(BlinkLedWithInterval,"greenLedTask",10000,(void *)greenLedTaskParameters,10,NULL,1);
+    xTaskCreatePinnedToCore(PrintStringTask,"printingToCore1",10000,NULL,1,NULL,1);
+
 }
 
 void BlinkLedWithInterval(void * pvParameters){
@@ -46,6 +35,14 @@ void BlinkLedWithInterval(void * pvParameters){
         ledState = !ledState;
         ESP_LOGI(TAG, "Changed pin: %d state to %d", pin, ledState);
         vTaskDelay(interval/portTICK_PERIOD_MS);
+    }
+}
+
+void PrintStringTask(void *pvPrarameters){
+    int CoreID = xPortGetCoreID();
+
+    for(;;){
+        ESP_LOGI(TAG, "Task pinned To Core: %d", CoreID);
     }
 }
 
