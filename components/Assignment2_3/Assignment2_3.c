@@ -10,7 +10,7 @@ void run_Assignment2_3(){
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task1",10000,1,1,NULL,0);
     xTaskCreatePinnedToCore(
-        GenericTaskCode,"Task2",10000,2,5,NULL,0);
+        GenericTaskCode,"Task2",10000,2,1,NULL,0);
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task3",10000,3,1,NULL,0);
     xTaskCreatePinnedToCore(
@@ -26,7 +26,7 @@ void run_Assignment2_3(){
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task9",10000,9,10,NULL,0);
     xTaskCreatePinnedToCore(
-        DelayedTaskCode,"Task10",10000,10,1,NULL,0);
+        GenericTaskCode,"Task10",10000,10,1,NULL,0);
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task11",10000,11,1,NULL,0);
     xTaskCreatePinnedToCore(
@@ -44,7 +44,7 @@ void run_Assignment2_3(){
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task18",10000,18,1,NULL,0);
     xTaskCreatePinnedToCore(
-        DelayedTaskCode,"Task19",10000,19,10,NULL,0);
+        GenericTaskCode,"Task19",10000,19,10,NULL,0);
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task20",10000,20,1,NULL,0);
 }
@@ -58,7 +58,7 @@ void GenericTaskCode(int taskNumber){
 void DelayedTaskCode(int taskNumber){
     for(;;){
         ESP_LOGI(TAG, "this is Task %d", taskNumber);
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        vTaskDelay(100/portTICK_PERIOD_MS);
     }
 }
 
