@@ -14,22 +14,27 @@ void Core_0_TaskLifecycle(){
     int timesDelayed = 0;
     ESP_LOGI(TAG, "Task is opgezet");
     for(;;){
-    int priority = uxTaskPriorityGet(NULL);
-    ESP_LOGI(TAG, "Task currently has a Priority of: %d",priority);
-    
-    if (priority < 2){
-        vTaskDelete(NULL);
-    }
-
-
     vTaskDelay(4000/portTICK_PERIOD_MS);
     ESP_LOGI(TAG, "weer 4 seconde");
     timesDelayed++;
-    if (timesDelayed > 1){
-        timesDelayed = 0;
-        vTaskPrioritySet(NULL,priority-1);
+    timesDelayed = CheckAndUpdatePriority(timesDelayed);
     }
+}
 
+int CheckAndUpdatePriority(int timesDelayed){
+    static int priority = 6;
 
-    }
+    if (timesDelayed < 2) return timesDelayed;
+
+    timesDelayed = 0;
+    vTaskPrioritySet(NULL,priority-1);
+    priority = uxTaskPriorityGet(NULL);
+    ESP_LOGI(TAG, "Task currently has a Priority of: %d",priority);
+
+    if (priority > 1) return timesDelayed;
+
+    ESP_LOGE(TAG, "Task is being deleted");
+    vTaskDelete(NULL);
+
+    return NULL;
 }
