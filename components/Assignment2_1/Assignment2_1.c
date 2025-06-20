@@ -22,13 +22,13 @@ void Core_0_TaskLifecycle(){
 }
 
 int CheckAndUpdatePriority(int timesDelayed){
-    static int priority = 6;
+    static int priority;
 
     if (timesDelayed < 2) return timesDelayed;
 
     timesDelayed = 0;
-    vTaskPrioritySet(NULL,priority-1);
-    priority = uxTaskPriorityGet(NULL);
+    priority = uxTaskPriorityGet(NULL) -1;
+    vTaskPrioritySet(NULL,priority);
     ESP_LOGI(TAG, "Task currently has a Priority of: %d",priority);
 
     if (priority > 1) return timesDelayed;
