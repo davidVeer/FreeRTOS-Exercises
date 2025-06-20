@@ -8,9 +8,9 @@ static const char *TAG = "Assignment2_3";
 
 void run_Assignment2_3(){
     xTaskCreatePinnedToCore(
-        GenericTaskCode,"Task1",10000,1,1,NULL,0);
+        GenericTaskCode,"Task1",10000,1,2,NULL,0);
     xTaskCreatePinnedToCore(
-        GenericTaskCode,"Task2",10000,2,1,NULL,0);
+        GenericTaskCode,"Task2",10000,2,5,NULL,0);
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task3",10000,3,1,NULL,0);
     xTaskCreatePinnedToCore(
@@ -44,7 +44,7 @@ void run_Assignment2_3(){
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task18",10000,18,1,NULL,0);
     xTaskCreatePinnedToCore(
-        GenericTaskCode,"Task19",10000,19,10,NULL,0);
+        DelayedTaskCode,"Task19",10000,19,10,NULL,0);
     xTaskCreatePinnedToCore(
         GenericTaskCode,"Task20",10000,20,1,NULL,0);
 }
@@ -58,7 +58,7 @@ void GenericTaskCode(int taskNumber){
 void DelayedTaskCode(int taskNumber){
     for(;;){
         ESP_LOGI(TAG, "this is Task %d", taskNumber);
-        vTaskDelay(100/portTICK_PERIOD_MS);
+        vTaskDelay(10/portTICK_PERIOD_MS);
     }
 }
 
