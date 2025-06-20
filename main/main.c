@@ -5,5 +5,5 @@
 
 void app_main(void)
 {
-
+    run_Assignment2_2();
 }
