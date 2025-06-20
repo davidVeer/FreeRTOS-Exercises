@@ -6,11 +6,14 @@
 #include "esp_log.h"
 
 static const char *TAG = "Assignment2_2";
-
-void run_Assignment2_2(){
+    int greenLedTaskParameters[2] = {18,200};
     int redLedTaskParameters[2] = {23,1000};
 
-    configureLed(23);
+
+void run_Assignment2_2(){
+    configureLed(redLedTaskParameters[0]);
+    configureLed(greenLedTaskParameters[0]);
+    
     xTaskCreatePinnedToCore(
         BlinkLedWithInterval,           //Task function
         "redLedTask",                   // task Name
@@ -19,6 +22,16 @@ void run_Assignment2_2(){
         10,                             // priority
         NULL,                           // Taskhandle
         0                               // Core ID
+    );
+
+    xTaskCreatePinnedToCore(
+        BlinkLedWithInterval,           //Task function
+        "greenLedTask",                 // task Name
+        10000,                          //stackDepth
+        (void *)greenLedTaskParameters, //parameters
+        10,                             // priority
+        NULL,                           // Taskhandle
+        1                               // Core ID
     );
 }
 
