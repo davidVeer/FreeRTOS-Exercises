@@ -1,5 +1,5 @@
-#ifndef ASSIGNMENT2_1_H
-#define ASSIGNMENT2_1_H
+#ifndef ASSIGNMENT2_2_H
+#define ASSIGNMENT2_2_H
 
 
 #endif
