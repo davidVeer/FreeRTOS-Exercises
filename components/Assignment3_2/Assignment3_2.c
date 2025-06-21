@@ -4,25 +4,27 @@
 #include "freertos/task.h"
 #include "Assignment3_2.h"
 #include "freertos/queue.h"
+#include "esp_log.h"
+
+static const char *TAG = "factory with cueues";
 
 QueueHandle_t DB_queue;   // data buffer
 QueueHandle_t PA_queue;   // pallet A
 QueueHandle_t PB_queue;   // pallet B
 QueueHandle_t PC_queue;   // pallet C
 
-typedef struct {
-    char type; // 'A', 'B' of 'C'
-} Product;
+char productA = 'A';
+char productB = 'B';
+char productC = 'C';
 
 void ProducerTask(void *pvParameters) {
-    char productType = *(char *)pvParameters;
-    Product p;
-
-    while (1) {
-        p.type = productType;
-
-        if (xQueueSend(DB_queue, &p, portMAX_DELAY) == pdPASS) {
-            printf("Producer %c -> geplaatst in DB\n", productType);
+    char productType = *(char*)pvParameters;
+    char product;
+    ESP_LOGI(TAG,"programma is in de producer task met product type %c", productType);
+    for(;;){
+        product = productType;
+        if (xQueueSend(DB_queue, &product, portMAX_DELAY) == pdPASS) {
+            ESP_LOGI(TAG,"Producer %c -> geplaatst in DB", productType);
         }
 
         vTaskDelay((500 + random() % 500)/portTICK_PERIOD_MS);
@@ -31,10 +33,11 @@ void ProducerTask(void *pvParameters) {
 
 void ConsumerTask(void *pvParameters) {
     char consumerType = *(char *)pvParameters;
-    Product p;
+    char product;
 
-    while (1) {
-        if (xQueueReceive(DB_queue, &p, portMAX_DELAY) == pdPASS && p.type == consumerType) {
+    for(;;){
+        if (xQueueReceive(DB_queue, &product, portMAX_DELAY) == pdPASS) {
+            if (product == consumerType){
             QueueHandle_t targetPallet;
             switch (consumerType) {
                 case 'A': 
@@ -51,8 +54,13 @@ void ConsumerTask(void *pvParameters) {
                     break;
                 }
 
-                xQueueSend(targetPallet, &p, portMAX_DELAY);
-                printf("Consumer %c <- gepakt uit DB en geplaatst op pallet\n", consumerType);
+                xQueueSend(targetPallet, &product, portMAX_DELAY);
+                ESP_LOGI(TAG,"Consumer %c <- gepakt uit DB en geplaatst op pallet", consumerType);
+            }
+           else {
+                xQueueSendToFront(DB_queue, &product, portMAX_DELAY);
+                ESP_LOGI(TAG,"Package was placed back to db queue");
+           }
         }
     }
 }
@@ -70,25 +78,24 @@ void ShowStatusTask(void *pvParameters) {
 }
 
 void run_Assignment3_2(void) {
-    DB_queue = xQueueCreate(10, sizeof(Product));
-    PA_queue = xQueueCreate(10, sizeof(Product));
-    PB_queue = xQueueCreate(10, sizeof(Product));
-    PC_queue = xQueueCreate(10, sizeof(Product));
+    DB_queue = xQueueCreate(100, sizeof(char));
+    PA_queue = xQueueCreate(100, sizeof(productA));
+    PB_queue = xQueueCreate(100, sizeof(productB));
+    PC_queue = xQueueCreate(100, sizeof(productC));
 
     if (DB_queue == NULL || PA_queue == NULL || PB_queue == NULL || PC_queue == NULL) {
-        printf("FOUT: Queue creatie mislukt.\n");
-        while (1);
+        ESP_LOGI(TAG,"FOUT: Queue creatie mislukt.");
+        return;
     }
 
-    static char a = 'A', b = 'B', c = 'C';
+    xTaskCreate(ProducerTask, "ProducerA", 10000, &productA, 1, NULL);
+    xTaskCreate(ProducerTask, "ProducerB", 10000, &productB, 1, NULL);
+    xTaskCreate(ProducerTask, "ProducerC", 10000, &productC, 1, NULL);
 
-    xTaskCreate(ProducerTask, "ProducerA", 1000, &a, 1, NULL);
-    xTaskCreate(ProducerTask, "ProducerB", 1000, &b, 1, NULL);
-    xTaskCreate(ProducerTask, "ProducerC", 1000, &c, 1, NULL);
+    xTaskCreate(ConsumerTask, "ConsumerA", 10000, &productA, 1, NULL);
+    xTaskCreate(ConsumerTask, "ConsumerB", 10000, &productB, 1, NULL);
+    xTaskCreate(ConsumerTask, "ConsumerC", 10000, &productC, 1, NULL);
 
-    xTaskCreate(ConsumerTask, "ConsumerA", 1000, &a, 1, NULL);
-    xTaskCreate(ConsumerTask, "ConsumerB", 1000, &b, 1, NULL);
-    xTaskCreate(ConsumerTask, "ConsumerC", 1000, &c, 1, NULL);
-
-    xTaskCreate(ShowStatusTask, "Status", 1000, NULL, 1, NULL);
+    xTaskCreate(ShowStatusTask, "Status", 10000, NULL, 1, NULL);
 }
+
