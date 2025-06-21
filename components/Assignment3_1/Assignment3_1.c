@@ -30,24 +30,29 @@ enum { TASK_STACK_SIZE = 2048 };  // Bytes in ESP32, words in vanilla FreeRTOS
 static SemaphoreHandle_t bin_sem;   // Wait for parameters to be read
 static SemaphoreHandle_t done_sem;  // Notifies main task when done
 static SemaphoreHandle_t chopstick[NUM_TASKS];
+static int ledPins[] = {23,22,21,19,18};
 
 //*****************************************************************************
 // Tasks
 
 // The only task: eating
 void eat(void *parameters) {
-
+  
   int num;
   char buf[50];
+  int delay;
 
   // Copy parameter and increment semaphore count
   num = *(int *)parameters;
   xSemaphoreGive(bin_sem);
+  for(;;){
 
   // Take left chopstick
+  
   xSemaphoreTake(chopstick[num], portMAX_DELAY);
   sprintf(buf, "Philosopher %i took chopstick %i", num, num);
   ESP_LOGI(TAG,"%s", buf);
+  
 
   // Add some delay to force deadlock
   vTaskDelay(1 / portTICK_PERIOD_MS);
@@ -57,10 +62,13 @@ void eat(void *parameters) {
   sprintf(buf, "Philosopher %i took chopstick %i", num, (num+1)%NUM_TASKS);
   ESP_LOGI(TAG,"%s", buf);
 
+
   // Do some eating
   sprintf(buf, "Philosopher %i is eating", num);
   ESP_LOGI(TAG,"%s", buf);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  blink_led(ledPins[num], 1);
+  delay = random()%1000;
+  vTaskDelay(delay / portTICK_PERIOD_MS);
 
   // Put down right chopstick
   xSemaphoreGive(chopstick[(num+1)%NUM_TASKS]);
@@ -71,26 +79,27 @@ void eat(void *parameters) {
   xSemaphoreGive(chopstick[num]);
   sprintf(buf, "Philosopher %i returned chopstick %i", num, num);
   ESP_LOGI(TAG,"%s", buf);
-  // Notify main task and delete self
-  xSemaphoreGive(done_sem);
-  vTaskDelete(NULL);
+
+  delay = random()%1000;
+  vTaskDelay(delay / portTICK_PERIOD_MS);
+  ESP_LOGI(TAG,"Philosopher is thinking for %d milliseconds", delay);
+  blink_led(ledPins[num], 0);
+    }
 }
 
 //*****************************************************************************
-// Main (runs as its own task with priority 1 on core 1)
+// Main (runs as its own task with priority 1 on core 0 )
 
 void run_Assignment3_1() {
 
   char task_name[20];
-
-  // Wait a moment to start (so we don't miss Serial output)
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
   ESP_LOGI(TAG,"---FreeRTOS Dining Philosophers Challenge---");
 
   // Create kernel objects before starting tasks
   bin_sem = xSemaphoreCreateBinary();
   done_sem = xSemaphoreCreateCounting(NUM_TASKS, 0);
   for (int i = 0; i < NUM_TASKS; i++) {
+    configure_led(ledPins[i]);
     chopstick[i] = xSemaphoreCreateMutex();
   }
 
@@ -115,4 +124,16 @@ void run_Assignment3_1() {
 
   // Say that we made it through without deadlock
   ESP_LOGI(TAG,"Done! No deadlock occurred!");
+}
+
+static void configure_led(int pin)
+{
+    ESP_LOGI(TAG, "Example configured to blink GPIO LED!");
+    gpio_reset_pin(pin);
+    gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+}
+
+static void blink_led(int pin, int state)
+{
+    gpio_set_level(pin, state);
 }
